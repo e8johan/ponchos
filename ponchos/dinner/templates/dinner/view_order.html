@@ -1,0 +1,48 @@
+{% extends "dinner/base.html" %}
+{% block contents %}
+<script>
+function cancelOrder() {
+    const order = {'order': {{order.pk}} };
+
+    const json = JSON.stringify(order);
+
+    const request = new XMLHttpRequest();
+    request.open("POST", '{% url "api_cancel_order" %}');
+    request.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+    request.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
+
+    request.onreadystatechange = () => {
+        if (request.readyState == XMLHttpRequest.DONE && request.status == 200)
+            window.location.href = '{% url "index" %}';
+    }
+
+    request.send(json);
+}
+</script>
+
+<h1>Order #{{ order.pk }} till {{ order.orderer }}</h1>
+
+<table class="table table-striped table-hover">
+<thead>
+<tr>
+<th width="60%">Rätt</th>
+<th>Antal</th>
+</tr>
+</thead>
+<tbody>
+{% for item in order.orderitem_set.all %}
+  <tr>
+    <td class="align-middle">{{ item.dish.dish_name }}</td>
+    <td class="align-middle">{{ item.amount }}</td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+
+<div class="d-flex flex-row-reverse">
+  <button type="button" class="btn btn-outline-danger btn-lg p-2" onclick="cancelOrder()">Avbeställ</button>
+</div>
+
+<hr />
+<p>[ <a href='{% url "index" %}'>Översikt</a> ]</p>
+{% endblock %}
